@@ -16,6 +16,7 @@ export default function DivisionSim({ onComplete }) {
   const [steps, setSteps] = useState([])
   const [done, setDone] = useState(false)
   const [showHint, setShowHint] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const { dividend, divisor, quotient, remainder } = problem
   const dividendDigits = String(dividend).split('').map(Number)
@@ -38,33 +39,39 @@ export default function DivisionSim({ onComplete }) {
   const allSteps = buildSteps()
   const [revealed, setReveal] = useState(0)
 
-  const handleReveal = async () => {
+  useEffect(() => {
+    if (!isPlaying) return;
     if (revealed < allSteps.length) {
-      const s = allSteps[revealed]
-      playSFX('tick')
-      await speak(
-        `Bring down ${s.bring}. We have ${s.running}. ${divisor} goes into ${s.running} ${s.q} time${s.q !== 1 ? 's' : ''}. ${s.q} times ${divisor} equals ${s.mult}. Subtract: ${s.running} minus ${s.mult} equals ${s.sub}.`,
-        { rate: 0.9 }
-      )
-      setReveal(r => r + 1)
-      if (revealed === allSteps.length - 1) {
-        setTimeout(async () => {
-          setDone(true)
-          playSFX('correct')
-          const msg = remainder > 0
-            ? `Final answer: ${quotient} remainder ${remainder}!`
-            : `Final answer: ${quotient}!`
-          await speak(msg)
-        }, 400)
-      }
+      const timer = setTimeout(() => {
+        const s = allSteps[revealed]
+        playSFX('tick')
+        speak(
+          `Bring down ${s.bring}. We have ${s.running}. ${divisor} goes into ${s.running} ${s.q} time${s.q !== 1 ? 's' : ''}. ${s.q} times ${divisor} equals ${s.mult}. Subtract: ${s.running} minus ${s.mult} equals ${s.sub}.`,
+          { rate: 0.9 }
+        )
+        setReveal(r => r + 1)
+      }, 1500)
+      return () => clearTimeout(timer)
+    } else if (revealed === allSteps.length && !done) {
+      const timer = setTimeout(() => {
+        setDone(true)
+        playSFX('correct')
+        const msg = remainder > 0
+          ? `Final answer: ${quotient} remainder ${remainder}!`
+          : `Final answer: ${quotient}!`
+        speak(msg)
+        setIsPlaying(false)
+      }, 1000)
+      return () => clearTimeout(timer)
     }
-  }
+  }, [isPlaying, revealed, allSteps, divisor, quotient, remainder, speak, playSFX, done])
 
   const handleReset = () => {
     setProblem(generateProblem())
     setReveal(0)
     setDone(false)
     setShowHint(false)
+    setIsPlaying(false)
   }
 
   return (
@@ -171,12 +178,14 @@ export default function DivisionSim({ onComplete }) {
 
       {/* Buttons */}
       <div className="flex gap-3 justify-center">
-        {!done ? (
-          <motion.button className="btn-primary" onClick={handleReveal}
+        {!done && !isPlaying ? (
+          <motion.button className="btn-primary" onClick={() => setIsPlaying(true)}
             whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
             style={{ background: 'linear-gradient(135deg, #00D4AA, #00A88A)' }}>
-            {revealed === 0 ? 'Start Division ▶' : 'Next Step ▶'}
+            Start Division ▶
           </motion.button>
+        ) : isPlaying ? (
+          <div className="text-accent-cyan font-bold animate-pulse px-4 py-2">Running Simulation...</div>
         ) : (
           <div className="flex gap-3">
             <button onClick={handleReset} className="btn-secondary">Try Another</button>

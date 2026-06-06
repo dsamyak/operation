@@ -111,6 +111,13 @@ const useSessionStore = create(
         }
       },
 
+      jumpToPhase: (targetPhase) => {
+        const { currentPhase, phaseHistory } = get()
+        if (targetPhase !== currentPhase) {
+          set({ currentPhase: targetPhase, phaseHistory: [...phaseHistory, currentPhase] })
+        }
+      },
+
       awardXP: (amount) => {
         set((s) => ({
           xpEarned: s.xpEarned + amount,

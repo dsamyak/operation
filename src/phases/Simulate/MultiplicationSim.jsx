@@ -20,6 +20,7 @@ export default function MultiplicationSim({ onComplete }) {
   const [showFinal, setShowFinal] = useState(false)
   const [highlighted, setHighlighted] = useState(null)
   const [completed, setCompleted] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const { a, b } = problem
   const bDigits = getDigits(b)  // e.g. [1,2,3] for 123
@@ -35,24 +36,29 @@ export default function MultiplicationSim({ onComplete }) {
     shift: i,
   }))
 
-  const handleNextStep = async () => {
+  useEffect(() => {
+    if (!isPlaying) return;
     if (step < partialValues.length) {
-      const p = partialValues[step]
-      setHighlighted(step)
-      setPartials(prev => [...prev, p])
-      playSFX('tick')
-      await speak(`${a} times ${p.digit} ${p.place === 'ones' ? '' : p.placeLabel} equals ${p.value.toLocaleString()}`, { rate: 0.95 })
-      setStep(s => s + 1)
-    }
-    if (step === partialValues.length - 1) {
-      setTimeout(async () => {
+      const timer = setTimeout(() => {
+        const p = partialValues[step]
+        setHighlighted(step)
+        setPartials(prev => [...prev, p])
+        playSFX('tick')
+        speak(`${a} times ${p.digit} ${p.place === 'ones' ? '' : p.placeLabel} equals ${p.value.toLocaleString()}`, { rate: 0.95 })
+        setStep(s => s + 1)
+      }, 1200) // Fast 1.2s intervals
+      return () => clearTimeout(timer)
+    } else if (step === partialValues.length && !showFinal) {
+      const timer = setTimeout(() => {
         setShowFinal(true)
         playSFX('correct')
-        await speak(`Add all partial products: ${partialValues.map(p => p.value.toLocaleString()).join(' plus ')} equals ${answer.toLocaleString()}!`)
+        speak(`Add all partial products: ${partialValues.map(p => p.value.toLocaleString()).join(' plus ')} equals ${answer.toLocaleString()}!`)
         setCompleted(true)
-      }, 500)
+        setIsPlaying(false)
+      }, 1000)
+      return () => clearTimeout(timer)
     }
-  }
+  }, [isPlaying, step, partialValues, a, answer, speak, playSFX, showFinal])
 
   const handleReset = () => {
     setProblem(generateProblem())
@@ -61,6 +67,7 @@ export default function MultiplicationSim({ onComplete }) {
     setShowFinal(false)
     setHighlighted(null)
     setCompleted(false)
+    setIsPlaying(false)
   }
 
   return (
@@ -160,19 +167,16 @@ export default function MultiplicationSim({ onComplete }) {
 
       {/* Action buttons */}
       <div className="flex gap-3 justify-center">
-        {step < partialValues.length ? (
+        {step === 0 && !isPlaying ? (
           <motion.button
             className="btn-primary"
-            onClick={handleNextStep}
+            onClick={() => setIsPlaying(true)}
             whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            Reveal Next Partial Product ▶
+            Start Simulation ▶
           </motion.button>
-        ) : !showFinal ? (
-          <motion.button className="btn-primary" onClick={handleNextStep}
-            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            Add Them All! 🎉
-          </motion.button>
-        ) : (
+        ) : isPlaying ? (
+          <div className="text-accent-cyan font-bold animate-pulse px-4 py-2">Running Simulation...</div>
+        ) : showFinal ? (
           <div className="flex gap-3">
             <button onClick={handleReset} className="btn-secondary">Try Another</button>
             {completed && (
@@ -183,7 +187,7 @@ export default function MultiplicationSim({ onComplete }) {
               </motion.button>
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   )

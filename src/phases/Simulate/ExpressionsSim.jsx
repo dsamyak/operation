@@ -24,20 +24,22 @@ export default function ExpressionsSim({ onComplete }) {
 
   const { seq, step, next } = pattern
 
-  const handleCheck = async () => {
+  const handleCheck = () => {
     const val = parseInt(userGuess)
     setChecked(true)
     if (val === next) {
       setCorrect(true)
       playSFX('correct')
-      await speak(`Correct! The rule is plus ${step}. ${seq[seq.length-1]} plus ${step} equals ${next}!`)
+      speak(`Correct! The rule is plus ${step}. ${seq[seq.length-1]} plus ${step} equals ${next}!`)
       if (round >= 3) {
         setTimeout(() => setDone(true), 800)
+      } else {
+        setTimeout(handleNextRound, 2000)
       }
     } else {
       setTries(t => t + 1)
       playSFX('wrong')
-      await speak(`Not quite. Look at the differences between terms. What's the pattern?`)
+      speak(`Not quite. Look at the differences between terms. What's the pattern?`)
       setChecked(false)
       setUserGuess('')
       if (tries >= 1) setShowRule(true)
@@ -163,7 +165,7 @@ export default function ExpressionsSim({ onComplete }) {
             <motion.div className="text-center space-y-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <p className="text-accent-cyan font-bold">🎉 Correct! Rule: +{step}</p>
               {round < 3 ? (
-                <button className="btn-secondary" onClick={handleNextRound}>Next Pattern →</button>
+                <div className="text-text-secondary text-sm animate-pulse mt-2">Moving to next round...</div>
               ) : (
                 <button className="btn-primary" onClick={() => setExprMode(true)}>Try Expressions Next →</button>
               )}
@@ -195,7 +197,16 @@ export default function ExpressionsSim({ onComplete }) {
               onClick={() => {
                 const correct = exprInput.replace(/\s/g,'').toLowerCase() === scenarios[scenIdx].answer.replace(/\s/g,'').toLowerCase()
                 setExprChecked(true)
-                if (correct) { playSFX('correct') } else { playSFX('wrong') }
+                if (correct) { 
+                  playSFX('correct')
+                  speak('Correct!')
+                  if (scenIdx < scenarios.length - 1) {
+                    setTimeout(() => { setScenIdx(i => i+1); setExprInput(''); setExprChecked(false) }, 1500)
+                  }
+                } else { 
+                  playSFX('wrong')
+                  speak('Try again!')
+                }
               }}>
               Check
             </button>
@@ -223,9 +234,9 @@ export default function ExpressionsSim({ onComplete }) {
 
           <div className="flex gap-3 justify-center">
             {scenIdx < scenarios.length - 1 ? (
-              <button className="btn-secondary" onClick={() => { setScenIdx(i => i+1); setExprInput(''); setExprChecked(false) }}>
-                Next Scenario →
-              </button>
+              exprChecked && exprInput.replace(/\s/g,'').toLowerCase() === scenarios[scenIdx].answer.replace(/\s/g,'').toLowerCase() && (
+                <div className="text-text-secondary text-sm animate-pulse mt-2">Loading next scenario...</div>
+              )
             ) : (
               <motion.button className="btn-primary" onClick={onComplete}
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>

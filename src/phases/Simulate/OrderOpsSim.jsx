@@ -49,27 +49,36 @@ export default function OrderOpsSim({ onComplete }) {
   const [problem, setProblem] = useState(generateExpression)
   const [currentStep, setCurrentStep] = useState(0)
   const [done, setDone] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const { expr, answer, steps } = problem
 
-  const handleNextStep = async () => {
+  useEffect(() => {
+    if (!isPlaying) return;
     if (currentStep < steps.length) {
-      const s = steps[currentStep]
-      playSFX('tick')
-      await speak(s.action, { rate: 0.93 })
-      setCurrentStep(c => c + 1)
-      if (currentStep === steps.length - 1) {
+      const timer = setTimeout(() => {
+        const s = steps[currentStep]
+        playSFX('tick')
+        speak(s.action, { rate: 0.93 })
+        setCurrentStep(c => c + 1)
+      }, 1500)
+      return () => clearTimeout(timer)
+    } else if (currentStep === steps.length && !done) {
+      const timer = setTimeout(() => {
         playSFX('correct')
         setDone(true)
-        await speak(`The final answer is ${answer}!`)
-      }
+        speak(`The final answer is ${answer}!`)
+        setIsPlaying(false)
+      }, 1000)
+      return () => clearTimeout(timer)
     }
-  }
+  }, [isPlaying, currentStep, steps, answer, speak, playSFX, done])
 
   const handleReset = () => {
     setProblem(generateExpression())
     setCurrentStep(0)
     setDone(false)
+    setIsPlaying(false)
   }
 
   return (
@@ -152,12 +161,14 @@ export default function OrderOpsSim({ onComplete }) {
 
       {/* Buttons */}
       <div className="flex gap-3 justify-center">
-        {!done ? (
-          <motion.button className="btn-primary" onClick={handleNextStep}
+        {!done && !isPlaying ? (
+          <motion.button className="btn-primary" onClick={() => setIsPlaying(true)}
             style={{ background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000' }}
             whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            {currentStep === 0 ? 'Start Evaluating ▶' : `Step ${currentStep + 1}: ${steps[currentStep]?.action.split(':')[0]} ▶`}
+            Start Evaluating ▶
           </motion.button>
+        ) : isPlaying ? (
+          <div className="text-accent-yellow font-bold animate-pulse px-4 py-2">Running Simulation...</div>
         ) : (
           <div className="flex gap-3">
             <button onClick={handleReset} className="btn-secondary">Try Another</button>

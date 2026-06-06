@@ -87,7 +87,7 @@ export default function WorksheetPhase() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      pdf.save(`MathQuest_Module${moduleId}_Worksheet.pdf`)
+      pdf.save(`Intellia360_Module${moduleId}_Worksheet.pdf`)
       
       if (!downloaded) {
         setDownloaded(true)
@@ -298,7 +298,7 @@ const PrintableWorksheet = React.forwardRef(({ questions, moduleId, theme, maste
   return (
     <div ref={ref} style={{ width: '800px', padding: '40px', background: 'white', color: 'black', fontFamily: 'sans-serif' }}>
       <div style={{ textAlign: 'center', borderBottom: `4px solid ${theme.color}`, paddingBottom: '20px', marginBottom: '30px' }}>
-        <h1 style={{ margin: 0, fontSize: '28px', color: theme.color }}>MathQuest: Operation Infinity</h1>
+        <h1 style={{ margin: 0, fontSize: '28px', color: theme.color }}>Intellia 360: Operation Infinity</h1>
         <h2 style={{ margin: '10px 0 0 0', fontSize: '22px' }}>Module {moduleId}: {theme.name} — Interactive Worksheet</h2>
         <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'space-between', fontSize: '14px', border: '1px solid #ccc', padding: '10px', borderRadius: '8px' }}>
           <span><strong>Name:</strong> ______________________</span>
