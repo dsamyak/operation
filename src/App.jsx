@@ -85,16 +85,16 @@ function ModuleSelectScreen({ onSelect }) {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="mb-8 flex justify-center"
+            className="mb-8 inline-flex justify-center"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             <div 
-              className="p-4 md:p-6 rounded-[2rem] backdrop-blur-md relative overflow-hidden group logo-container"
+              className="p-2 md:p-3 rounded-[1.5rem] backdrop-blur-md relative overflow-hidden group logo-container"
               style={{ 
                 background: 'var(--glass-bg)', 
                 border: '1px solid var(--glass-border)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+                boxShadow: '0 0 30px rgba(108, 99, 255, 0.6), inset 0 0 15px rgba(108, 99, 255, 0.4)'
               }}
             >
               {/* Optional animated sheen */}
@@ -106,20 +106,20 @@ function ModuleSelectScreen({ onSelect }) {
               <img 
                 src="/logo-360.png" 
                 alt="Intellia 360 Logo" 
-                className="h-28 md:h-36 object-contain relative z-10 drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+                className="h-20 md:h-28 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]"
               />
             </div>
           </motion.div>
           <h1
             className="text-5xl md:text-6xl font-black mb-4 leading-tight"
-            style={{ fontFamily: 'Space Grotesk' }}
+            style={{ fontFamily: 'Space Grotesk', filter: 'drop-shadow(0 0 20px rgba(108, 99, 255, 0.5))' }}
           >
             <span style={{ background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Intellia 360</span>
-            <span className="text-[var(--text-primary)]">: </span>
-            <span style={{ color: 'var(--warning)' }}>Operation</span>
-            <span className="text-[var(--text-primary)]"> Infinity</span>
+            <span className="text-[var(--text-primary)]" style={{ textShadow: '0 0 15px rgba(255,255,255,0.5)' }}>: </span>
+            <span style={{ color: 'var(--warning)', textShadow: '0 0 20px rgba(255, 217, 61, 0.6)' }}>Operation</span>
+            <span className="text-[var(--text-primary)]" style={{ textShadow: '0 0 15px rgba(255,255,255,0.5)' }}> Infinity</span>
           </h1>
-          <p className="text-[var(--text-secondary)] text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[var(--text-primary)] text-xl max-w-2xl mx-auto leading-relaxed font-medium" style={{ textShadow: '0 0 12px rgba(255,255,255,0.4)' }}>
             A fully gamified Grade 5 math adventure — earn XP, unlock badges, and master arithmetic across kingdoms!
           </p>
 
